@@ -2,14 +2,14 @@
 
 > **Precision matching when seconds matter.**
 > 
-> DonorDash is a centralized, highly specialized healthcare logistics platform designed to manage the complex allocation of critical and scarce medical resources, specifically blood, rare plasma, and organ transplants. 
+> DonorDash is a centralized, highly specialized healthcare logistics platform designed to manage the complex allocation of critical and scarce medical resources, specifically blood, rare plasma and organ transplants. 
 
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ## 📖 Overview
-Rather than functioning as a standard patient-doctor portal, DonorDash operates entirely as a high-stakes matching engine. It cross-references patient needs with a massive network of donors and hospitals, ensuring that life-saving resources are distributed rapidly, fairly, and safely based on strict biological compatibility and calculated medical urgency.
+Rather than functioning as a standard patient-doctor portal, DonorDash operates entirely as a high-stakes matching engine. It cross-references patient needs with a massive network of donors and hospitals, ensuring that life-saving resources are distributed rapidly, fairly and safely based on strict biological compatibility and calculated medical urgency.
 
 ## ✨ Core Features
 The system is built on a highly normalized relational database and powered by 9 advanced SQL-driven operational modules:
