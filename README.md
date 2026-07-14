@@ -41,4 +41,4 @@ The system utilizes Disjoint Specialization to strictly categorize internal staf
 ## 🎓 Academic Context
 This platform was developed as a comprehensive Database Systems engineering project at **BRAC University**.
 * **Course:** CSE370 - Database Systems
-* **Team Members:** Taufiq Mustafizur Rahman, S. M. Tahmidul Hoque, Mohammad Ahonaf Bin Ameen
+* **Team Members:** Taufiq Mustafizur Rahman, S. M. Tahmidul Hoque and Mohammad Ahonaf Bin Ameen
