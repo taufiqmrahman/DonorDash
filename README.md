@@ -14,15 +14,15 @@ Rather than functioning as a standard patient-doctor portal, DonorDash operates 
 ## ✨ Core Features
 The system is built on a highly normalized relational database and powered by 9 advanced SQL-driven operational modules:
 
-1. **Stockout Predictor:** Predicts exactly how many days are left until a hospital runs out of a specific blood group[cite: 1].
-2. **Automated Resource Rebalancer:** Automatically matches hospitals running out of blood with neighboring hospitals that have too much[cite: 1].
-3. **Donor Loyalty Analyzer:** Tracks what percentage of donors return to donate again the following year[cite: 1].
-4. **Hospital Wastage Tracker:** Calculates the percentage of blood units that expire before they can be used at each hospital[cite: 1].
-5. **Suspicious Activity Monitor:** Flags staff members who are registering an unusually high number of "Urgent" patients compared to average[cite: 1].
-6. **Rare Trait Priority Scanner:** Automatically flags patients who need a genetic match that exists in less than 1% of the donor database[cite: 1].
-7. **Emergency Nearby Resource Locator:** Instantly finds the three closest hospitals in nearby zones that have a required resource ready to go[cite: 1].
-8. **Waitlist Priority Escalator:** Bumps up the urgency of patients who have been waiting longer than 90% of historically treated patients[cite: 1].
-9. **Best Match Scoring System:** Gives a numbered score to potential donors based on how perfectly their blood and tissue match the patient[cite: 1].
+1. **Stockout Predictor:** Predicts exactly how many days are left until a hospital runs out of a specific blood group.
+2. **Automated Resource Rebalancer:** Automatically matches hospitals running out of blood with neighboring hospitals that have too much.
+3. **Donor Loyalty Analyzer:** Tracks what percentage of donors return to donate again the following year.
+4. **Hospital Wastage Tracker:** Calculates the percentage of blood units that expire before they can be used at each hospital.
+5. **Suspicious Activity Monitor:** Flags staff members who are registering an unusually high number of "Urgent" patients compared to average.
+6. **Rare Trait Priority Scanner:** Automatically flags patients who need a genetic match that exists in less than 1% of the donor database.
+7. **Emergency Nearby Resource Locator:** Instantly finds the three closest hospitals in nearby zones that have a required resource ready to go.
+8. **Waitlist Priority Escalator:** Bumps up the urgency of patients who have been waiting longer than 90% of historically treated patients.
+9. **Best Match Scoring System:** Gives a numbered score to potential donors based on how perfectly their blood and tissue match the patient.
 
 ## 🛠️ Architecture & Tech Stack
 This project enforces strict referential integrity and role-based access control. All database interactions utilize raw SQL queries without the use of Object-Relational Mappers (ORMs) to demonstrate core database management competencies.
@@ -39,9 +39,9 @@ The system utilizes Disjoint Specialization to strictly categorize internal staf
 * **Data Clerk:** Data entry access for registering citizen bio-data and recording donation logs.
 
 ## 🎓 Academic Context
-This platform was developed as a comprehensive Database Systems engineering project at **BRAC University**[cite: 1].
-* **Course:** CSE370 - Database Systems (Spring 2026, Section 03, Group 03)[cite: 1]
+This platform was developed as a comprehensive Database Systems engineering project at **BRAC University**.
+* **Course:** CSE370 - Database Systems (Spring 2026, Section 03, Group 03)
 * **Team Members:** 
-  * Taufiq Mustafizur Rahman (ID: 24301485)[cite: 1]
-  * S. M. Tahmidul Hoque (ID: 24341017)[cite: 1]
-  * Mohammad Ahonaf Bin Ameen (ID: 24301078)[cite: 1]
+  * Taufiq Mustafizur Rahman (ID: 24301485)
+  * S. M. Tahmidul Hoque (ID: 24341017)
+  * Mohammad Ahonaf Bin Ameen (ID: 24301078)
