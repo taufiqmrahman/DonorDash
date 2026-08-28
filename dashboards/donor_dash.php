@@ -8,15 +8,6 @@ if (!isset($_SESSION['donor_id'])) {
 $did = $_SESSION['donor_id'];
 $msg = "";
 
-//Handle Dismiss Notification (Mark as Read)
-if (isset($_GET['dismiss'])) {
-    $notif_id = intval($_GET['dismiss']);
-    if (!isset($_SESSION['dismissed_donors'])) $_SESSION['dismissed_donors'] = [];
-    $_SESSION['dismissed_donors'][] = $notif_id;
-    header("Location: donor_dash.php");
-    exit();
-}
-
 //Handle New Donation Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['donate_resource'])) {
     $resc_type = $_POST['resc_type'];
@@ -50,11 +41,10 @@ if($last_don && $last_don['Last_Date']) {
 }
 
 //Notifications
-$notif_stmt = $conn->prepare("SELECT Notification_ID, Message, Created_At FROM Notifications WHERE Target_Role = 'Donor' AND Target_ID = ? ORDER BY Created_At DESC");
+$notif_stmt = $conn->prepare("SELECT Message, Created_At FROM Notifications WHERE Target_Role = 'Donor' AND Target_ID = ? ORDER BY Created_At DESC");
 $notif_stmt->bind_param("i", $did);
 $notif_stmt->execute();
 $notifications = $notif_stmt->get_result();
-$dismissed = $_SESSION['dismissed_donors'] ?? [];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -121,8 +111,6 @@ $dismissed = $_SESSION['dismissed_donors'] ?? [];
                 <?php 
                 $active_alerts = 0;
                 while($alert = $notifications->fetch_assoc()): 
-                    $nid = $alert['Notification_ID'] ?? 0;
-                    if(in_array($nid, $dismissed)) continue;
                     $active_alerts++;
                 ?>
                     <div class="p-3 bg-slate-50 border-l-2 border-slate-900 rounded text-xs text-slate-900 flex justify-between items-start transition duration-300 hover:bg-slate-100">
@@ -130,7 +118,6 @@ $dismissed = $_SESSION['dismissed_donors'] ?? [];
                             <span class="block text-slate-500 mb-1"><?= date('M j, Y, g:i a', strtotime($alert['Created_At'])) ?></span>
                             <?= htmlspecialchars($alert['Message']) ?>
                         </div>
-                        <a href="donor_dash.php?dismiss=<?= $nid ?>" class="text-[10px] bg-black text-white hover:bg-slate-800 px-2 py-1 rounded ml-4 whitespace-nowrap transition">Mark as Read</a>
                     </div>
                 <?php endwhile; ?>
                 <?php if ($active_alerts === 0): ?>
