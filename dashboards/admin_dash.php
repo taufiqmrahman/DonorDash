@@ -93,6 +93,19 @@ $c5 = ($q5) ? $q5->num_rows : 0;
     <meta charset="UTF-8"><title>Admin Dashboard - DonorDash</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../assets/app.css">
+    <script>
+        function toggleSection(id) {
+            const section = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.innerHTML = '▲';
+            } else {
+                section.classList.add('hidden');
+                icon.innerHTML = '▼';
+            }
+        }
+    </script>
 </head>
 <body class="app-page bg-slate-50 text-slate-900 min-h-screen p-8">
     <div class="max-w-7xl mx-auto">
@@ -101,21 +114,24 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             <a href="../auth/logout.php" class="app-button text-xs bg-black hover:bg-slate-800 px-4 py-2 rounded-lg text-white transition">Logout</a>
         </div>
 
-        <!-- ROW 1: Short Tables (Features 1 & 3) -->
+        <!-- ROW 1: Features 1 & 3 -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
             <!-- Feature 1 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm relative">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-sm font-bold text-slate-900 uppercase">Feature 1: Stockout Predictor</h2>
-                    <?php if($c1 > 0): ?>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-900 border border-slate-300 animate-pulse">
-                            🔥 <?= $c1 ?> Critical Alert<?= $c1 > 1 ? 's' : '' ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
-                <div class="overflow-auto w-full">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="toggleSection('feat1')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase">Stockout Predictor</h2>
+                        <?php if($c1 > 0): ?>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-white text-slate-900 border border-slate-300 animate-pulse">
+                                🔥 <?= $c1 ?> Critical Alert<?= $c1 > 1 ? 's' : '' ?>
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span id="icon-feat1" class="text-slate-500 text-xs">▼</span>
+                </button>
+                <div id="feat1" class="hidden p-4 overflow-auto max-h-[350px]">
                     <table class="w-full text-xs text-left text-slate-900">
-                        <tr class="text-slate-600 border-b border-slate-200 sticky top-0 bg-white">
+                        <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Hospital ID</th><th>Resource</th><th>Available</th><th>Days Left</th>
                         </tr>
                         <?php while($r = $q1->fetch_assoc()): ?>
@@ -131,11 +147,14 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             </div>
 
             <!-- Feature 3 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm relative">
-                <h2 class="text-sm font-bold text-slate-900 uppercase mb-4">Feature 3: Donor Loyalty Analyzer</h2>
-                <div class="overflow-auto w-full">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="toggleSection('feat3')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase">Donor Loyalty Analyzer</h2>
+                    <span id="icon-feat3" class="text-slate-500 text-xs">▼</span>
+                </button>
+                <div id="feat3" class="hidden p-4 overflow-auto max-h-[350px]">
                     <table class="w-full text-xs text-left text-slate-900">
-                        <tr class="text-slate-600 border-b border-slate-200 sticky top-0 bg-white">
+                        <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Cohort Year</th><th>Original Size</th><th>Retained</th><th>Retention Rate</th>
                         </tr>
                         <?php while($r = $q3->fetch_assoc()): ?>
@@ -151,21 +170,24 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             </div>
         </div>
 
-        <!-- ROW 2: Heavy Scrollable Tables (Features 2 & 4) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-stretch">
+        <!-- ROW 2: Features 2 & 4 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
             <!-- Feature 2 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm relative flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-sm font-bold text-slate-900 uppercase">Feature 2: Automated Resource Rebalancer</h2>
-                    <?php if($c2 > 0): ?>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-900 border border-slate-300 animate-pulse">
-                            ⚡ <?= $c2 ?> Rebalance Action Required
-                        </span>
-                    <?php endif; ?>
-                </div>
-                <div class="overflow-auto max-h-[350px] w-full flex-1">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="toggleSection('feat2')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase">Automated Rebalancer</h2>
+                        <?php if($c2 > 0): ?>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-white text-slate-900 border border-slate-300 animate-pulse">
+                                ⚡ <?= $c2 ?> Action Required
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span id="icon-feat2" class="text-slate-500 text-xs">▼</span>
+                </button>
+                <div id="feat2" class="hidden p-4 overflow-auto max-h-[350px]">
                     <table class="w-full text-xs text-left text-slate-900">
-                        <tr class="text-slate-600 border-b border-slate-200 sticky top-0 bg-white">
+                        <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Receiver H_ID</th><th>Sender H_ID</th><th>Resource</th>
                         </tr>
                         <?php while($r = $q2->fetch_assoc()): ?>
@@ -180,11 +202,14 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             </div>
 
             <!-- Feature 4 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm flex flex-col">
-                <h2 class="text-sm font-bold text-slate-900 uppercase mb-4">Feature 4: Hospital Wastage Tracker</h2>
-                <div class="overflow-auto max-h-[350px] w-full flex-1">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="toggleSection('feat4')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
+                    <h2 class="text-sm font-bold text-slate-900 uppercase">Hospital Wastage Tracker</h2>
+                    <span id="icon-feat4" class="text-slate-500 text-xs">▼</span>
+                </button>
+                <div id="feat4" class="hidden p-4 overflow-auto max-h-[350px]">
                     <table class="w-full text-xs text-left text-slate-900">
-                        <tr class="text-slate-600 border-b border-slate-200 sticky top-0 bg-white">
+                        <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Hospital ID</th><th>Total Received</th><th>Expired</th><th>Wastage %</th>
                         </tr>
                         <?php while($r = $q4->fetch_assoc()): ?>
@@ -200,21 +225,23 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             </div>
         </div>
 
-        <!-- ROW 3: Full Width Table (Feature 5) -->
+        <!-- ROW 3: Feature 5 (Full Width) -->
         <div class="w-full mb-6">
-            <!-- Feature 5 -->
-            <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm relative flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-sm font-bold text-slate-900 uppercase">Feature 5: Suspicious Activity Monitor</h2>
-                    <?php if($c5 > 0): ?>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-900 border border-slate-300 animate-pulse">
-                            🚨 <?= $c5 ?> Security Flag Triggered
-                        </span>
-                    <?php endif; ?>
-                </div>
-                <div class="overflow-auto max-h-[350px] w-full flex-1">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+                <button onclick="toggleSection('feat5')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-sm font-bold text-slate-900 uppercase">Suspicious Activity Monitor</h2>
+                        <?php if($c5 > 0): ?>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-white text-slate-900 border border-slate-300 animate-pulse">
+                                🚨 <?= $c5 ?> Security Flag Triggered
+                            </span>
+                        <?php endif; ?>
+                    </div>
+                    <span id="icon-feat5" class="text-slate-500 text-xs">▼</span>
+                </button>
+                <div id="feat5" class="hidden p-4 overflow-auto max-h-[350px]">
                     <table class="w-full text-xs text-left text-slate-900">
-                        <tr class="text-slate-600 border-b border-slate-200 sticky top-0 bg-white">
+                        <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Staff ID</th><th>Urgent Registrations (Past 30 Days)</th>
                         </tr>
                         <?php if($q5 && $q5->num_rows > 0): ?>

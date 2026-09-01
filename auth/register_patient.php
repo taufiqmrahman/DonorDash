@@ -13,8 +13,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $conn->begin_transaction();
     try {
-        $stmt = $conn->prepare("INSERT INTO Patient (Name, Blood_Grp, Urgency, Password) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssis", $name, $bg, $urg, $pass);
+        // 1. Automatically assign an available staff member from the selected hospital
+        $staff_query = $conn->prepare("SELECT Staff_ID FROM Hospital_Staff WHERE H_ID = ? LIMIT 1");
+        $staff_query->bind_param("i", $hid);
+        $staff_query->execute();
+        $staff_result = $staff_query->get_result();
+        
+        // Default to NULL if no staff exists for that hospital yet, otherwise grab the ID
+        $staff_id = ($staff_result->num_rows > 0) ? $staff_result->fetch_assoc()['Staff_ID'] : NULL;
+
+        // 2. Include Staff_ID in the Patient INSERT statement
+        $stmt = $conn->prepare("INSERT INTO Patient (Name, Blood_Grp, Urgency, Password, Staff_ID) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssisi", $name, $bg, $urg, $pass, $staff_id);
         $stmt->execute();
         $pid = $stmt->insert_id;
 
@@ -28,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $msg = "Registered successfully! Your Patient ID is <strong>$pid</strong>. Awaiting staff approval.";
     } catch(Exception $e) {
         $conn->rollback();
-        $msg = "Error during registration.";
+        $msg = "Error during registration: " . $e->getMessage();
     }
 }
 $hospitals = $conn->query("SELECT H_ID, Facility_Name FROM Hospital");

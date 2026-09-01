@@ -16,7 +16,7 @@
             <span class="font-extrabold text-xl tracking-wider text-slate-900">DONORDASH</span>
         </div>
         <div class="text-xs text-slate-600 border border-slate-200 px-3 py-1.5 rounded-full bg-white">
-            System Operational • Enterprise Logistics
+            Triple T
         </div>
     </header>
 
@@ -43,7 +43,7 @@
                 <p class="text-slate-600 text-xs">View recovery windows, donation tracking, and eligibility.</p>
             </a>
             <a href="auth/login_patient.php" class="portal-card bg-white border border-slate-200 hover:border-slate-900 hover:shadow-md p-6 rounded-2xl transition duration-300 group">
-                <div class="text-slate-900 font-bold text-lg mb-2 group-hover:translate-x-1 transition">Patient Queue &rarr;</div>
+                <div class="text-slate-900 font-bold text-lg mb-2 group-hover:translate-x-1 transition">Patient  &rarr;</div>
                 <p class="text-slate-600 text-xs">Live waitlist position tracking and match escalations.</p>
             </a>
         </div>
