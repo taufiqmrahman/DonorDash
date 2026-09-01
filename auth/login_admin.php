@@ -9,15 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->bind_param("s", $u);
     $stmt->execute();
     $res = $stmt->get_result();
-    // Replaces line 11-15
     if ($row = $res->fetch_assoc()) {
-        // Safe check for plain text FIRST, completely bypassing password_verify if true
         if ($p === $row['Password']) {
             $_SESSION['admin_id'] = $row['Staff_ID'];
             header("Location: ../dashboards/admin_dash.php");
             exit();
         } 
-        // Only run password_verify if the string actually looks like a hash
         elseif (strpos($row['Password'], '$2y$') === 0 && password_verify($p, $row['Password'])) {
             $_SESSION['admin_id'] = $row['Staff_ID'];
             header("Location: ../dashboards/admin_dash.php");
