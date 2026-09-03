@@ -159,10 +159,10 @@ if ($selected_patient_id > 0) {
         </div>
 
         <!-- Advanced SQL Features (Clicky/Collapsible) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="dashboard-grid grid grid-cols-1 md:grid-cols-2 items-start gap-6">
 
             <!-- Feature 6 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat6')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Rare Trait Priority</h2>
                     <span id="icon-feat6" class="text-slate-500 text-xs">▼</span>
@@ -187,7 +187,7 @@ if ($selected_patient_id > 0) {
             </div>
 
             <!-- Feature 7 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat7')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Emergency Locator</h2>
                     <span id="icon-feat7" class="text-slate-500 text-xs">▼</span>
@@ -213,7 +213,7 @@ if ($selected_patient_id > 0) {
             </div>
 
             <!-- Feature 8 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat8')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Waitlist Escalator</h2>
                     <span id="icon-feat8" class="text-slate-500 text-xs">▼</span>
@@ -238,7 +238,7 @@ if ($selected_patient_id > 0) {
             </div>
 
             <!-- Feature 9 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat9')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Best Match Scoring</h2>
                     <span id="icon-feat9" class="text-slate-500 text-xs"><?= ($selected_patient_id > 0) ? '▲' : '▼' ?></span>

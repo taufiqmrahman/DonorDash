@@ -37,7 +37,7 @@ $notifications = $notif_stmt->get_result();
     <div class="max-w-3xl mx-auto space-y-6">
         
         <div class="flex justify-between items-center border-b border-slate-200 pb-4">
-            <h1 class="text-2xl font-black text-slate-900">Patient Live Waitlist Queue</h1>
+            <h1 class="text-2xl font-black text-slate-900">Patient Dashboard</h1>
             <a href="../auth/logout.php" class="app-button text-xs bg-black hover:bg-slate-800 px-4 py-2 rounded-lg text-white transition">Logout</a>
         </div>
         

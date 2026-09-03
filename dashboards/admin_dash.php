@@ -3,21 +3,39 @@ session_start();
 require_once '../config/db.php';
 if (!isset($_SESSION['admin_id'])) { header("Location: ../auth/login_admin.php"); exit(); }
 
-// Feature 1: Stockout Predictor Query
-$q1 = $conn->query("
-    WITH DailyUsage AS (
-        SELECT H_ID, Resc_Type, COUNT(Unit_ID) / 30.0 AS Daily_Burn_Rate 
-        FROM Inventory_Log WHERE Status = 'Used' AND Usage_Date >= CURRENT_DATE - INTERVAL 30 DAY 
-        GROUP BY H_ID, Resc_Type
-    ), CurrentStock AS (
-        SELECT H_ID, Resc_Type, COUNT(Unit_ID) AS Available_Units 
-        FROM Inventory_Log WHERE Status = 'Available' 
-        GROUP BY H_ID, Resc_Type
-    )
-    SELECT c.H_ID, c.Resc_Type, c.Available_Units, ROUND(c.Available_Units / NULLIF(u.Daily_Burn_Rate, 0), 1) AS Days_Until_Depletion
-    FROM CurrentStock c LEFT JOIN DailyUsage u ON c.H_ID = u.H_ID AND c.Resc_Type = u.Resc_Type
-    WHERE (c.Available_Units / NULLIF(u.Daily_Burn_Rate, 0)) < 3.0
-");
+// Fetch Global Hospital List for Dropdowns
+$hospitals = [];
+$h_res = $conn->query("SELECT H_ID, Facility_Name FROM Hospital ORDER BY H_ID ASC");
+while($row = $h_res->fetch_assoc()) { $hospitals[] = $row; }
+
+// --- Feature 1: Stockout Predictor (Strict Filtering & 15-Day Threshold) ---
+$f1_filter = (isset($_GET['f1_hid']) && $_GET['f1_hid'] !== '') ? intval($_GET['f1_hid']) : 0;
+$open_panel = $_GET['open_panel'] ?? '';
+$q1 = null;
+
+if ($f1_filter > 0) {
+    $q1 = $conn->query("
+        WITH DailyUsage AS (
+            SELECT H_ID, Resc_Type, COUNT(Unit_ID) / 30.0 AS Daily_Burn_Rate 
+            FROM Inventory_Log WHERE Status = 'Used' AND Usage_Date >= CURRENT_DATE - INTERVAL 30 DAY 
+            GROUP BY H_ID, Resc_Type
+        ), CurrentStock AS (
+            SELECT H_ID, Resc_Type, COUNT(Unit_ID) AS Available_Units 
+            FROM Inventory_Log WHERE Status = 'Available' 
+            GROUP BY H_ID, Resc_Type
+        )
+        SELECT 
+            u.H_ID, 
+            u.Resc_Type, 
+            COALESCE(c.Available_Units, 0) AS Available_Units, 
+            ROUND(COALESCE(c.Available_Units, 0) / u.Daily_Burn_Rate, 1) AS Days_Until_Depletion
+        FROM DailyUsage u 
+        LEFT JOIN CurrentStock c ON u.H_ID = c.H_ID AND u.Resc_Type = c.Resc_Type
+        WHERE (COALESCE(c.Available_Units, 0) / u.Daily_Burn_Rate) <= 15.0 
+        AND u.H_ID = $f1_filter
+        ORDER BY Days_Until_Depletion ASC
+    ");
+}
 
 // Feature 2: Automated Resource Rebalancer Query
 $q2 = $conn->query("
@@ -66,11 +84,16 @@ $q3 = $conn->query("
     FROM FirstDonation f LEFT JOIN SubsequentDonation s ON f.Donor_ID = s.Donor_ID GROUP BY f.Cohort_Year
 ");
 
-// Feature 4: Hospital Wastage Tracker Query
-$q4 = $conn->query("
-    SELECT H_ID, COUNT(Unit_ID) AS Total_Units_Received, SUM(CASE WHEN Status = 'Expired' THEN 1 ELSE 0 END) AS Expired_Units, SUM(CASE WHEN Status = 'Used' THEN 1 ELSE 0 END) AS Successfully_Used, ROUND(SUM(CASE WHEN Status = 'Expired' THEN 1 ELSE 0 END) * 100.0 / COUNT(Unit_ID), 2) AS Wastage_Percentage
-    FROM Inventory_Log WHERE Receipt_Date >= CURRENT_DATE - INTERVAL 1 YEAR GROUP BY H_ID ORDER BY Wastage_Percentage DESC
-");
+// --- Feature 4: Hospital Wastage Tracker (Strict Filtering) ---
+$f4_filter = (isset($_GET['f4_hid']) && $_GET['f4_hid'] !== '') ? intval($_GET['f4_hid']) : 0;
+$q4 = null;
+
+if ($f4_filter > 0) {
+    $q4 = $conn->query("
+        SELECT H_ID, COUNT(Unit_ID) AS Total_Units_Received, SUM(CASE WHEN Status = 'Expired' THEN 1 ELSE 0 END) AS Expired_Units, SUM(CASE WHEN Status = 'Used' THEN 1 ELSE 0 END) AS Successfully_Used, ROUND(SUM(CASE WHEN Status = 'Expired' THEN 1 ELSE 0 END) * 100.0 / COUNT(Unit_ID), 2) AS Wastage_Percentage
+        FROM Inventory_Log WHERE Receipt_Date >= CURRENT_DATE - INTERVAL 1 YEAR AND H_ID = $f4_filter GROUP BY H_ID ORDER BY Wastage_Percentage DESC
+    ");
+}
 
 // Feature 5: Suspicious Activity Monitor Query
 $q5 = $conn->query("
@@ -82,9 +105,8 @@ $q5 = $conn->query("
     SELECT c.Staff_ID, c.Urgent_Registrations FROM ClerkStats c CROSS JOIN GlobalAverages g WHERE c.Urgent_Registrations > (COALESCE(g.Avg_Reg, 0) + (2 * COALESCE(g.Std_Dev, 0)))
 ");
 
-// Badge Counts for Presentation Showcase Polish
-$c1 = $q1->num_rows;
-$c2 = $q2->num_rows;
+$c1 = ($q1) ? $q1->num_rows : 0;
+$c2 = ($q2) ? $q2->num_rows : 0;
 $c5 = ($q5) ? $q5->num_rows : 0;
 ?>
 <!DOCTYPE html>
@@ -115,9 +137,10 @@ $c5 = ($q5) ? $q5->num_rows : 0;
         </div>
 
         <!-- ROW 1: Features 1 & 3 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
+        <div class="dashboard-grid grid grid-cols-1 md:grid-cols-2 items-start gap-6 mb-6">
+            
             <!-- Feature 1 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat1')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <div class="flex items-center gap-3">
                         <h2 class="text-sm font-bold text-slate-900 uppercase">Stockout Predictor</h2>
@@ -127,27 +150,51 @@ $c5 = ($q5) ? $q5->num_rows : 0;
                             </span>
                         <?php endif; ?>
                     </div>
-                    <span id="icon-feat1" class="text-slate-500 text-xs">▼</span>
+                    <span id="icon-feat1" class="text-slate-500 text-xs"><?= ($open_panel === 'feat1') ? '▲' : '▼' ?></span>
                 </button>
-                <div id="feat1" class="hidden p-4 overflow-auto max-h-[350px]">
+                <div id="feat1" class="<?= ($open_panel === 'feat1') ? 'p-4 overflow-auto max-h-[450px]' : 'hidden p-4 overflow-auto max-h-[450px]' ?>">
+                    
+                    <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <form method="GET" action="admin_dash.php" class="flex gap-2 items-end">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Filter by Target Hospital</label>
+                                <select name="f1_hid" required class="w-full bg-white border border-slate-300 rounded p-2 text-xs focus:outline-none focus:border-slate-900">
+                                    <option value="">-- Choose a Hospital --</option>
+                                    <?php foreach($hospitals as $h): ?>
+                                        <option value="<?= $h['H_ID'] ?>" <?= ($f1_filter == $h['H_ID']) ? 'selected' : '' ?>>
+                                            ID <?= $h['H_ID'] ?>: <?= htmlspecialchars($h['Facility_Name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <?php if(isset($_GET['f4_hid'])): ?><input type="hidden" name="f4_hid" value="<?= $_GET['f4_hid'] ?>"><?php endif; ?>
+                            <input type="hidden" name="open_panel" value="feat1">
+                            <button type="submit" class="bg-black text-white px-4 py-2 rounded text-xs font-bold hover:bg-slate-800 transition">Apply</button>
+                        </form>
+                    </div>
+
                     <table class="w-full text-xs text-left text-slate-900">
                         <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Hospital ID</th><th>Resource</th><th>Available</th><th>Days Left</th>
                         </tr>
-                        <?php while($r = $q1->fetch_assoc()): ?>
-                        <tr class="border-b border-slate-100">
-                            <td class="py-3"><?= $r['H_ID'] ?></td>
-                            <td><?= $r['Resc_Type'] ?></td>
-                            <td><?= $r['Available_Units'] ?></td>
-                            <td class="font-bold text-slate-900"><?= $r['Days_Until_Depletion'] ?> Days</td>
-                        </tr>
-                        <?php endwhile; ?>
+                        <?php if($f1_filter == 0): ?>
+                            <tr><td colspan="4" class="py-6 text-center text-slate-500 italic">Please select a hospital above to view stockout predictions.</td></tr>
+                        <?php elseif($q1 && $q1->num_rows > 0): while($r = $q1->fetch_assoc()): ?>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3"><?= $r['H_ID'] ?></td>
+                                <td><?= $r['Resc_Type'] ?></td>
+                                <td class="text-slate-500 font-semibold"><?= $r['Available_Units'] ?> Units</td>
+                                <td class="font-bold text-red-500"><?= $r['Days_Until_Depletion'] ?> Days</td>
+                            </tr>
+                        <?php endwhile; else: ?>
+                            <tr><td colspan="4" class="py-6 text-center text-slate-500 italic">No critical stockouts predicted for this facility.</td></tr>
+                        <?php endif; ?>
                     </table>
                 </div>
             </div>
 
             <!-- Feature 3 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat3')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Donor Loyalty Analyzer</h2>
                     <span id="icon-feat3" class="text-slate-500 text-xs">▼</span>
@@ -171,9 +218,10 @@ $c5 = ($q5) ? $q5->num_rows : 0;
         </div>
 
         <!-- ROW 2: Features 2 & 4 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 items-start">
+        <div class="dashboard-grid grid grid-cols-1 md:grid-cols-2 items-start gap-6 mb-6">
+            
             <!-- Feature 2 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat2')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <div class="flex items-center gap-3">
                         <h2 class="text-sm font-bold text-slate-900 uppercase">Automated Rebalancer</h2>
@@ -192,8 +240,8 @@ $c5 = ($q5) ? $q5->num_rows : 0;
                         </tr>
                         <?php while($r = $q2->fetch_assoc()): ?>
                         <tr class="border-b border-slate-100">
-                            <td class="py-3"><?= $r['Receiver_Hospital'] ?></td>
-                            <td><?= $r['Sender_Hospital'] ?></td>
+                            <td class="py-3 font-bold text-red-600"><?= $r['Receiver_Hospital'] ?></td>
+                            <td class="font-bold text-green-600"><?= $r['Sender_Hospital'] ?></td>
                             <td><?= $r['Reqd_Resource'] ?></td>
                         </tr>
                         <?php endwhile; ?>
@@ -202,24 +250,48 @@ $c5 = ($q5) ? $q5->num_rows : 0;
             </div>
 
             <!-- Feature 4 -->
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat4')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <h2 class="text-sm font-bold text-slate-900 uppercase">Hospital Wastage Tracker</h2>
-                    <span id="icon-feat4" class="text-slate-500 text-xs">▼</span>
+                    <span id="icon-feat4" class="text-slate-500 text-xs"><?= ($open_panel === 'feat4') ? '▲' : '▼' ?></span>
                 </button>
-                <div id="feat4" class="hidden p-4 overflow-auto max-h-[350px]">
+                <div id="feat4" class="<?= ($open_panel === 'feat4') ? 'p-4 overflow-auto max-h-[450px]' : 'hidden p-4 overflow-auto max-h-[450px]' ?>">
+                    
+                    <div class="mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <form method="GET" action="admin_dash.php" class="flex gap-2 items-end">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-600 mb-1">Filter by Target Hospital</label>
+                                <select name="f4_hid" required class="w-full bg-white border border-slate-300 rounded p-2 text-xs focus:outline-none focus:border-slate-900">
+                                    <option value="">-- Choose a Hospital --</option>
+                                    <?php foreach($hospitals as $h): ?>
+                                        <option value="<?= $h['H_ID'] ?>" <?= ($f4_filter == $h['H_ID']) ? 'selected' : '' ?>>
+                                            ID <?= $h['H_ID'] ?>: <?= htmlspecialchars($h['Facility_Name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <?php if(isset($_GET['f1_hid'])): ?><input type="hidden" name="f1_hid" value="<?= $_GET['f1_hid'] ?>"><?php endif; ?>
+                            <input type="hidden" name="open_panel" value="feat4">
+                            <button type="submit" class="bg-black text-white px-4 py-2 rounded text-xs font-bold hover:bg-slate-800 transition">Apply</button>
+                        </form>
+                    </div>
+
                     <table class="w-full text-xs text-left text-slate-900">
                         <tr class="text-slate-600 border-b border-slate-200">
                             <th class="py-2">Hospital ID</th><th>Total Received</th><th>Expired</th><th>Wastage %</th>
                         </tr>
-                        <?php while($r = $q4->fetch_assoc()): ?>
-                        <tr class="border-b border-slate-100">
-                            <td class="py-3"><?= $r['H_ID'] ?></td>
-                            <td><?= $r['Total_Units_Received'] ?></td>
-                            <td><?= $r['Expired_Units'] ?></td>
-                            <td class="font-bold text-slate-900"><?= $r['Wastage_Percentage'] ?>%</td>
-                        </tr>
-                        <?php endwhile; ?>
+                        <?php if($f4_filter == 0): ?>
+                            <tr><td colspan="4" class="py-6 text-center text-slate-500 italic">Please select a hospital above to view wastage reports.</td></tr>
+                        <?php elseif($q4 && $q4->num_rows > 0): while($r = $q4->fetch_assoc()): ?>
+                            <tr class="border-b border-slate-100">
+                                <td class="py-3"><?= $r['H_ID'] ?></td>
+                                <td><?= $r['Total_Units_Received'] ?></td>
+                                <td class="text-red-500 font-bold"><?= $r['Expired_Units'] ?></td>
+                                <td class="font-bold text-slate-900"><?= $r['Wastage_Percentage'] ?>%</td>
+                            </tr>
+                        <?php endwhile; else: ?>
+                            <tr><td colspan="4" class="py-6 text-center text-slate-500 italic">No wastage records found for this facility.</td></tr>
+                        <?php endif; ?>
                     </table>
                 </div>
             </div>
@@ -227,7 +299,7 @@ $c5 = ($q5) ? $q5->num_rows : 0;
 
         <!-- ROW 3: Feature 5 (Full Width) -->
         <div class="w-full mb-6">
-            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden self-start">
                 <button onclick="toggleSection('feat5')" class="w-full flex justify-between items-center p-4 bg-slate-100 hover:bg-slate-200 transition">
                     <div class="flex items-center gap-3">
                         <h2 class="text-sm font-bold text-slate-900 uppercase">Suspicious Activity Monitor</h2>
@@ -248,7 +320,7 @@ $c5 = ($q5) ? $q5->num_rows : 0;
                             <?php while($r = $q5->fetch_assoc()): ?>
                             <tr class="border-b border-slate-100">
                                 <td class="py-3"><?= $r['Staff_ID'] ?></td>
-                                <td class="font-bold text-slate-900"><?= $r['Urgent_Registrations'] ?></td>
+                                <td class="font-bold text-red-600"><?= $r['Urgent_Registrations'] ?></td>
                             </tr>
                             <?php endwhile; ?>
                         <?php else: ?>

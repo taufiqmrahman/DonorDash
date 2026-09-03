@@ -32,6 +32,19 @@
     animation: rise-in 420ms ease both;
 }
 
+.app-page .dashboard-grid {
+    column-count: 2;
+    column-gap: 1.5rem;
+}
+
+.app-page .dashboard-grid > div {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    min-width: 0;
+    break-inside: avoid;
+}
+
 .app-page [class*="bg-white"]:not(footer):not(header) {
     background: rgba(255, 255, 255, 0.88) !important;
     border-color: var(--line) !important;
@@ -227,5 +240,9 @@
         width: 100%;
         overflow-x: auto;
         white-space: nowrap;
+    }
+
+    .app-page .dashboard-grid {
+        column-count: 1;
     }
 }
