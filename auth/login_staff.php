@@ -12,11 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($row = $res->fetch_assoc()) {
         $is_valid = false;
         
-        // Safe check for plain text
         if ($p === $row['Password']) {
             $is_valid = true;
         } 
-        // Fallback for real hashes later
         elseif (strpos($row['Password'], '$2y$') === 0 && password_verify($p, $row['Password'])) {
             $is_valid = true;
         }
