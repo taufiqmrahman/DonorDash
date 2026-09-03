@@ -53,7 +53,7 @@ $q6 = $conn->query("
     SELECT p.Patient_ID, p.Name, mf.Marker_ID, mf.Rarity_Percent FROM Patient p JOIN Has_Marker hm ON p.Patient_ID = hm.Patient_ID JOIN MarkerFrequency mf ON hm.Marker_ID = mf.Marker_ID WHERE mf.Rarity_Percent < 1.0
 ");
 
-// Feature 7: Emergency Nearby Resource Locator (Default Demo: Panthapath & AB- Plasma)
+// Feature 7: Emergency Nearby Resource Locator 
 $q7 = $conn->query("
     SELECT 
         TargetHospital.H_ID AS Sending_Hospital, 
@@ -74,7 +74,7 @@ $q8 = $conn->query("
     SELECT Patient_ID, Reqd_Resource, Date_Added, CURRENT_DATE - Date_Added AS Days_Waiting, PERCENT_RANK() OVER (PARTITION BY Reqd_Resource ORDER BY CURRENT_DATE - Date_Added ASC) AS Wait_Time_Percentile FROM Waitlisted_As WHERE Wait_Status = 'Active'
 ");
 
-// --- Feature 9: Best Match Scoring System (Dynamic) ---
+//Feature 9: Best Match Scoring System
 $patients_list = $conn->query("SELECT Patient_ID, Name, Blood_Grp FROM Patient ORDER BY Patient_ID ASC");
 $selected_patient_id = isset($_GET['match_patient_id']) ? intval($_GET['match_patient_id']) : 0;
 $q9 = null;

@@ -8,7 +8,7 @@ $hospitals = [];
 $h_res = $conn->query("SELECT H_ID, Facility_Name FROM Hospital ORDER BY H_ID ASC");
 while($row = $h_res->fetch_assoc()) { $hospitals[] = $row; }
 
-// --- Feature 1: Stockout Predictor (Strict Filtering & 15-Day Threshold) ---
+// Feature 1: Stockout Predictor (Strict Filtering & 15-Day Threshold)
 $f1_filter = (isset($_GET['f1_hid']) && $_GET['f1_hid'] !== '') ? intval($_GET['f1_hid']) : 0;
 $open_panel = $_GET['open_panel'] ?? '';
 $q1 = null;
@@ -84,7 +84,7 @@ $q3 = $conn->query("
     FROM FirstDonation f LEFT JOIN SubsequentDonation s ON f.Donor_ID = s.Donor_ID GROUP BY f.Cohort_Year
 ");
 
-// --- Feature 4: Hospital Wastage Tracker (Strict Filtering) ---
+// Feature 4: Hospital Wastage Tracker (Strict Filtering) ---
 $f4_filter = (isset($_GET['f4_hid']) && $_GET['f4_hid'] !== '') ? intval($_GET['f4_hid']) : 0;
 $q4 = null;
 
