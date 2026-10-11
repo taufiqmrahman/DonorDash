@@ -43,5 +43,5 @@ This platform was developed as a comprehensive Database Systems engineering proj
 * **Course:** CSE370 - Database Systems (Spring 2026, Section 03, Group 03)
 * **Team Members:** 
   * Taufiq Mustafizur Rahman (ID: 24301485)
-  * S. M. Tahmidul Hoque (ID: 24341017)
+  * S. M. Tahmidul Hoque (ID: 24341017) 
   * Mohammad Ahonaf Bin Ameen (ID: 24301078)
